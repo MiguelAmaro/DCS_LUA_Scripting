@@ -3,12 +3,17 @@
 --***************************
 -- Player
 local player = CLIENT:FindByName("Player #002")
-
 player:HandleEvent( EVENTS.Crash )
 
 -- Enemy
 local firstEnemy = true
-local enemyPlane = nil
+local enemyPlane = SPAWN:New( "enemy Template #001" )
+                        :InitLimit(1, 5)
+                        :InitRandomizePosition( true, 200, 50 )
+                        :SpawnScheduled( 5, .5 )
+                        
+enemyPlane:HandleEvent( EVENTS.Crash )
+      
 local enemyNum   = 1
 local enemyTemplates = {"enemy Template #001",
                         "enemy Template #002",
@@ -31,6 +36,7 @@ local Music_zoneBFM      = USERSOUND:New("afdx_z06.wav")
 local Music_zoneBombing  = USERSOUND:New("afdx_m12.wav")
 local Music_zoneAntiShip = USERSOUND:New("afdx_m16.wav")
 local Music_playerDied   = USERSOUND:New("afdx_MissionFailed.wav")
+--local Music_MissionSucces  = USERSOUND:New("afdx_MissionCompleted.wav")
 local Music_inTransit    = USERSOUND:New("afdx_Select.wav")
 
 -- Schedulers
@@ -41,9 +47,8 @@ local Music_inTransit    = USERSOUND:New("afdx_Select.wav")
 -- Function Definitions
 --***************************
 function SpawnEnemyPlane( newEnemyPlane )
-  enemyPlane = SPAWN:New( enemyTemplates[enemyNum] )
   enemyPlane:Spawn()
-  enemyPlane:HandleEvent( EVENTS.Crash )
+
   enemyNum = enemyNum + 1
 end
 
@@ -51,9 +56,9 @@ local currentZone = nil
 local inTransit   = true
 
 function ScanZones()
-  if     player:IsInZone(zoneBFM)      then currentZone = zoneBFM
+  if     player:IsInZone(zoneBFM     ) then currentZone = zoneBFM
   elseif player:IsInZone(zoneAntiShip) then currentZone = zoneAntiShip
-  elseif player:IsInZone(zoneBombing)  then currentZone = zoneBombing  
+  elseif player:IsInZone(zoneBombing ) then currentZone = zoneBombing  
   else   currentZone = nil 
   end
   
@@ -117,12 +122,13 @@ zoneScanScheduler = SCHEDULER:New(nil, ScanZones, {}, 0, 2)
 -- Event Handlers
 --*************************
 function enemyPlane:OnEventCrash( EventData )
-  if self == enemyPlane then
+  --if self == enemyPlane then
     --colectGarbage();
     MESSAGE:New("You killed that son of a bitch!", 10, "Success"):ToAll()
-    SpawnEnemyPlane()
+    --SpawnEnemyPlane()
     MESSAGE:New(   "Fuck here comes another one!", 10,   "Brief"):ToAll()
- end
+    Music_playerDied:ToAll();
+ --end
 end  
 
 function player:OnEventCrash( EventData )
