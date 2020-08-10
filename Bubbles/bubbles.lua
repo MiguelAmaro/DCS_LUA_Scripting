@@ -27,17 +27,26 @@ local enemyTemplates = {"enemy Template #001",
 local zones = {--zoneBFM = ZONE_RADIUS:New("zoneBFM")
               }
 
-local zoneBFM      = ZONE:New("zoneBFM"     )
-local zoneAntiShip = ZONE:New("zoneAntiShip")
-local zoneBombing  = ZONE:New("zoneBombing" )
+local zoneHomeAirBase        = ZONE:New("zoneHomeBase"          )
+local zoneAntiShip           = ZONE:New("zoneAntiShip"          )
+local zoneBFM                = ZONE:New("zoneBFM"               )
+local zoneBombing            = ZONE:New("zoneBombing"           )
+--local zoneHomeCarrier            = ZONE:New("zoneCarrier"           )
+local zoneDefensivePerimeter = ZONE:New("zoneDefensivePerimeter")
+
 
 -- Music Section
-local Music_zoneBFM      = USERSOUND:New("afdx_z06.wav")
-local Music_zoneBombing  = USERSOUND:New("afdx_m12.wav")
-local Music_zoneAntiShip = USERSOUND:New("afdx_m16.wav")
-local Music_playerDied   = USERSOUND:New("afdx_MissionFailed.wav")
---local Music_MissionSucces  = USERSOUND:New("afdx_MissionCompleted.wav")
-local Music_inTransit    = USERSOUND:New("afdx_Select.wav")
+---- Zone Music
+local Music_zoneAirBase            = USERSOUND:New("afdx_AirBase.wav"           )
+local Music_zoneAntiShip           = USERSOUND:New("afdx_AntiShip.wav"          )
+local Music_zoneBFM                = USERSOUND:New("afdx_BFM.wav"               )
+local Music_zoneBombing            = USERSOUND:New("afdx_Bombing.wav"           )
+local Music_zoneCarrier            = USERSOUND:New("afdx_Carrier.wav"           )
+local Music_zoneDefensivePerimeter = USERSOUND:New("afdx_DefensivePerimeter.wav")
+---- Logic Music
+--local Music_MissionSuccess         = USERSOUND:New("afdx_MissionCompleted.wav"  )
+local Music_playerDied             = USERSOUND:New("afdx_MissionFailed.wav"     )
+local Music_inTransit              = USERSOUND:New("afdx_Select.wav"            )
 
 -- Schedulers
 
@@ -48,7 +57,6 @@ local Music_inTransit    = USERSOUND:New("afdx_Select.wav")
 --***************************
 function SpawnEnemyPlane( newEnemyPlane )
   enemyPlane:Spawn()
-
   enemyNum = enemyNum + 1
 end
 
@@ -56,9 +64,12 @@ local currentZone = nil
 local inTransit   = true
 
 function ScanZones()
-  if     player:IsInZone(zoneBFM     ) then currentZone = zoneBFM
-  elseif player:IsInZone(zoneAntiShip) then currentZone = zoneAntiShip
-  elseif player:IsInZone(zoneBombing ) then currentZone = zoneBombing  
+  if     player:IsInZone(zoneHomeAirBase         ) then currentZone = zoneHomeAirBase
+ elseif player:IsInZone(zoneAntiShip             ) then currentZone = zoneAntiShip
+  elseif player:IsInZone(zoneBFM                 ) then currentZone = zoneBFM
+  elseif player:IsInZone(zoneBombing             ) then currentZone = zoneBombing
+--  elseif player:IsInZone(zoneHomeCarrier             ) then currentZone = zoneHomeCarrier
+  elseif player:IsInZone(zoneDefensivePerimeter  ) then currentZone = zoneDefensivePerimeter
   else   currentZone = nil 
   end
   
@@ -68,12 +79,13 @@ end
 
 function ZoneEntryAndExitHandler(currentZone) 
   local zoneName = "Some Zone" --currentZone:GetName()
+  
     -- Handles Transitions
   if currentZone == nil then
     if inTransit == true then
        player:MessageToAll("You have left " .. zoneName, 3, "Zones")
-        Music_inTransit:ToAll()
        
+       Music_inTransit:ToAll()
        inTransit = false
     else
        player:MessageToAll("Currently intransit", 1, "Debug") 
@@ -84,18 +96,27 @@ function ZoneEntryAndExitHandler(currentZone)
     if inTransit == false then
       player:MessageToAll("You have entered " .. zoneName, 3, "Zones")
       
-      if currentZone == zoneBombing then 
-        Music_zoneBombing:ToAll()
-       
+      if     currentZone == zoneHomeAirBase         then 
+       Music_zoneAirBase:ToAll()
         
-      elseif currentZone == zoneAntiShip then 
+       elseif currentZone == zoneAntiShip           then 
        Music_zoneAntiShip:ToAll()
-        
-      elseif currentZone == zoneBFM then 
+       
+       elseif currentZone == zoneBFM                then 
        Music_zoneBFM:ToAll()
        SpawnEnemyPlane()
         
+       elseif currentZone == zoneBombing            then 
+       Music_zoneBombing:ToAll()
+       --local payload = player:GetTemplatePayload()
+        
+--      elseif currentZone == zoneHomeCarrier            then 
+--       Music_zoneCarrier:ToAll()
+       
+      elseif currentZone == zoneDefensivePerimeter then 
+       Music_zoneDefensivePerimeter:ToAll()
       end
+      
       inTransit = true
     else
      player:MessageToAll("No longer intransit", 1, "Debug")
@@ -109,9 +130,12 @@ end
 --**************************
 
 --ZONE GAMEPLAY MARKERS
-zoneBFM     :SmokeZone( SMOKECOLOR.Green, 90 )
-zoneBombing :SmokeZone( SMOKECOLOR.Red  , 90 )
-zoneAntiShip:SmokeZone( SMOKECOLOR.Blue , 90 )
+zoneHomeAirBase        :SmokeZone( SMOKECOLOR.Orange , 90 )
+zoneAntiShip           :SmokeZone( SMOKECOLOR.Blue   , 90 )
+zoneBFM                :SmokeZone( SMOKECOLOR.Green  , 90 )
+zoneBombing            :SmokeZone( SMOKECOLOR.Red    , 90 )
+--zoneCarrier            :SmokeZone( SMOKECOLOR.White  , 90 )
+zoneDefensivePerimeter :SmokeZone( SMOKECOLOR.Red    , 90 )
 
 
 MESSAGE:New("Welcome to the Bubbles Mission", 10, "Start Message 1"):ToAll()
